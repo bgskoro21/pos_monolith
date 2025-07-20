@@ -1,0 +1,39 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ppdb_app
+    environment:
+      - DB_HOST=mysql
+    volumes:
+      - app_volume:/var/www
+    networks:
+      - ppdb_network
+    depends_on:
+      - mysql
+    ports:
+      - '8000:8000'
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_USER=bagaskara
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - ppdb_network
+    ports:
+      - '3307:3307' # NOTE: 3306 adalah default MySQL, kamu sebelumnya pakai 3307:3307 (itu hanya perlu jika kamu akses dari host)
+
+networks:
+  ppdb_network:
+
+volumes:
+  app_volume:
+  mysql_data:
