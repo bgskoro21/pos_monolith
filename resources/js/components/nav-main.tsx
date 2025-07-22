@@ -11,7 +11,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                 {items.map((item) => (
                     <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton
-                            className="!bg-primary"
+                            className="hover:bg-secondary data-[active=true]:bg-primary"
                             asChild
                             isActive={page.url.startsWith(item.href)}
                             tooltip={{ children: item.title }}
