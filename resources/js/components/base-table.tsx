@@ -1,11 +1,11 @@
 import { Pagination } from '@/types/pagination';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { ChevronDown, Table } from 'lucide-react';
+import { ColumnDef, flexRender, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table';
+import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from './ui/button';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Input } from './ui/input';
-import { TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 
 interface BaseTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -15,10 +15,19 @@ interface BaseTableProps<TData, TValue> {
 
 const BaseTable = <TData, TValue>({ columns, data }: BaseTableProps<TData, TValue>) => {
     const [search, setSearch] = useState<string>('');
+    const [rowSelection, setRowSelection] = useState({});
+    const [sorting, setSorting] = useState<SortingState>([]);
     const table = useReactTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        onRowSelectionChange: setRowSelection,
+        onSortingChange: setSorting,
+        getSortedRowModel: getSortedRowModel(),
+        state: {
+            rowSelection,
+            sorting,
+        },
     });
 
     return (
@@ -32,7 +41,23 @@ const BaseTable = <TData, TValue>({ columns, data }: BaseTableProps<TData, TValu
                             Columns <ChevronDown />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end"></DropdownMenuContent>
+                    <DropdownMenuContent align="end">
+                        {table
+                            .getAllColumns()
+                            .filter((column) => column.getCanHide())
+                            .map((column) => {
+                                return (
+                                    <DropdownMenuCheckboxItem
+                                        key={column.id}
+                                        className="capitalize"
+                                        checked={column.getIsVisible()}
+                                        onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                                    >
+                                        {column.id}
+                                    </DropdownMenuCheckboxItem>
+                                );
+                            })}
+                    </DropdownMenuContent>
                 </DropdownMenu>
             </div>
             <div className="rounded-md border">
