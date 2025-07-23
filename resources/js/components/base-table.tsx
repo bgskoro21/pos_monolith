@@ -1,3 +1,4 @@
+import { FilterData } from '@/types/filter';
 import { Pagination } from '@/types/pagination';
 import { router } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
@@ -12,11 +13,7 @@ interface BaseTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
     pagination: Pagination;
-    filters: {
-        keyword?: string;
-        sort?: string;
-        direction?: 'asc' | 'desc';
-    };
+    filters: FilterData;
     routeName: string;
 }
 
@@ -28,6 +25,7 @@ const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeNam
         columns,
         getCoreRowModel: getCoreRowModel(), // No client-side row model
         manualSorting: true,
+        manualPagination: true,
     });
 
     // Handle Search
@@ -40,7 +38,7 @@ const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeNam
                 sort: filters.sort,
                 direction: filters.direction,
                 page: 1,
-                limit: pagination.per_page,
+                limit: filters.limit,
             },
             { preserveState: true, replace: true },
         );
@@ -56,7 +54,7 @@ const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeNam
                 sort: columnId,
                 direction: direction,
                 page: pagination.current_page,
-                limit: pagination.per_page,
+                limit: filters.limit,
             },
             { preserveState: true, replace: true },
         );
@@ -71,7 +69,22 @@ const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeNam
                 sort: filters.sort,
                 direction: filters.direction,
                 page,
-                limit: pagination.per_page,
+                limit: filters.limit,
+            },
+            { preserveState: true, replace: true },
+        );
+    };
+
+    // Handle per page change
+    const handlePerPageChange = (limit: number) => {
+        router.get(
+            route(routeName),
+            {
+                keyword: search,
+                sort: filters.sort,
+                direction: filters.direction,
+                page: 1, // reset ke halaman pertama
+                limit,
             },
             { preserveState: true, replace: true },
         );
@@ -140,23 +153,37 @@ const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeNam
             </div>
 
             {/* Pagination */}
-            <div className="flex items-center justify-end space-x-2 py-4">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(pagination.current_page - 1)}
-                    disabled={pagination.current_page <= 1}
-                >
-                    Previous
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(pagination.current_page + 1)}
-                    disabled={pagination.current_page >= pagination.last_page}
-                >
-                    Next
-                </Button>
+            <div className="flex items-center justify-between py-4">
+                <div className="flex items-center space-x-2">
+                    <select value={pagination.per_page} onChange={(e) => handlePerPageChange(Number(e.target.value))} className="rounded border p-1">
+                        {[10, 25, 50, 100].map((size) => (
+                            <option key={size} value={size}>
+                                Show {size}
+                            </option>
+                        ))}
+                    </select>
+                    <div>
+                        Showing {pagination.from} to {pagination.to} of {pagination.total} entries
+                    </div>
+                </div>
+                <div className="space-x-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(pagination.current_page - 1)}
+                        disabled={pagination.current_page <= 1}
+                    >
+                        Previous
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(pagination.current_page + 1)}
+                        disabled={pagination.current_page >= pagination.last_page}
+                    >
+                        Next
+                    </Button>
+                </div>
             </div>
         </div>
     );

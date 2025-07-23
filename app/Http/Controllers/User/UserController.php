@@ -23,7 +23,8 @@ class UserController extends Controller
         $users = $this->userService->getPaginatedUsers($filters);
 
         return Inertia::render("users/user-index", [
-            "users" => $users
+            "users" => $users,
+            "filters" => $filters,
         ]);
     }
 }
