@@ -47,4 +47,26 @@ class UserRepository implements UserRepositoryInterface{
             tenancy()->end();
         }
     }
+
+    public function getPaginatedUsers(int $limit, ?string $keyword, ?string $sortField = 'name', ?string $sortDirection = 'asc')
+    {
+        $query = User::query();
+
+        if(!empty($keyword))
+        {
+            $query->where(function ($q) use ($keyword){
+                $q->where('name', 'like', "%{$keyword}%")
+                  ->orWhere('email', 'like', "%{$keyword}%");
+            });
+        }
+
+        $allowedSortFields = ['name', 'email', 'created_at'];
+        
+        if(in_array($sortField, $allowedSortFields))
+        {
+            $query->orderBy($sortField, $sortDirection);
+        }
+
+        return $query->paginate($limit);
+    }
 }

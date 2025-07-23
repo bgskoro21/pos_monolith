@@ -22,4 +22,14 @@ class UserService implements UserServiceInterface
 
         return $this->userRepository->create($data);
     }
+
+    public function getPaginatedUsers(array $filters)
+    {
+        $limit = $filters['limit'] ?? 10;
+        $keyword = $filters['keyword'] ?? null;
+        $sortField = $filters['sort'] ?? 'name';
+        $sortDirection = $filters['direction'] ?? 'asc';
+
+        return $this->userRepository->getPaginatedUsers($limit, $keyword, $sortField, $sortDirection);
+    }
 }

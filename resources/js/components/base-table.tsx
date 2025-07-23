@@ -1,5 +1,6 @@
 import { Pagination } from '@/types/pagination';
-import { ColumnDef, flexRender, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table';
+import { router } from '@inertiajs/react';
+import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from './ui/button';
@@ -10,30 +11,77 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 interface BaseTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
-    pagination?: Pagination;
+    pagination: Pagination;
+    filters: {
+        keyword?: string;
+        sort?: string;
+        direction?: 'asc' | 'desc';
+    };
+    routeName: string;
 }
 
-const BaseTable = <TData, TValue>({ columns, data }: BaseTableProps<TData, TValue>) => {
-    const [search, setSearch] = useState<string>('');
-    const [rowSelection, setRowSelection] = useState({});
-    const [sorting, setSorting] = useState<SortingState>([]);
+const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeName }: BaseTableProps<TData, TValue>) => {
+    const [search, setSearch] = useState(filters.keyword || '');
+
     const table = useReactTable({
         data,
         columns,
-        getCoreRowModel: getCoreRowModel(),
-        onRowSelectionChange: setRowSelection,
-        onSortingChange: setSorting,
-        getSortedRowModel: getSortedRowModel(),
-        state: {
-            rowSelection,
-            sorting,
-        },
+        getCoreRowModel: getCoreRowModel(), // No client-side row model
+        manualSorting: true,
     });
+
+    // Handle Search
+    const handleSearch = (value: string) => {
+        setSearch(value);
+        router.get(
+            route(routeName),
+            {
+                keyword: value,
+                sort: filters.sort,
+                direction: filters.direction,
+                page: 1,
+                limit: pagination.per_page,
+            },
+            { preserveState: true, replace: true },
+        );
+    };
+
+    // Handle Sorting
+    const handleSort = (columnId: string) => {
+        const direction = filters.direction === 'asc' ? 'desc' : 'asc';
+        router.get(
+            route(routeName),
+            {
+                keyword: search,
+                sort: columnId,
+                direction: direction,
+                page: pagination.current_page,
+                limit: pagination.per_page,
+            },
+            { preserveState: true, replace: true },
+        );
+    };
+
+    // Handle Pagination
+    const handlePageChange = (page: number) => {
+        router.get(
+            route(routeName),
+            {
+                keyword: search,
+                sort: filters.sort,
+                direction: filters.direction,
+                page,
+                limit: pagination.per_page,
+            },
+            { preserveState: true, replace: true },
+        );
+    };
 
     return (
         <div className="w-full overflow-x-auto">
+            {/* Search & Column Toggle */}
             <div className="flex items-center py-4">
-                <Input placeholder="Search..." value={search} onChange={(event) => setSearch(event.target.value)} className="max-w-sm" />
+                <Input placeholder="Search..." value={search} onChange={(e) => handleSearch(e.target.value)} className="max-w-sm" />
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -42,43 +90,39 @@ const BaseTable = <TData, TValue>({ columns, data }: BaseTableProps<TData, TValu
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        {table
-                            .getAllColumns()
-                            .filter((column) => column.getCanHide())
-                            .map((column) => {
-                                return (
-                                    <DropdownMenuCheckboxItem
-                                        key={column.id}
-                                        className="capitalize"
-                                        checked={column.getIsVisible()}
-                                        onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                                    >
-                                        {column.id}
-                                    </DropdownMenuCheckboxItem>
-                                );
-                            })}
+                        {table.getAllColumns().map((column) => (
+                            <DropdownMenuCheckboxItem
+                                key={column.id}
+                                className="capitalize"
+                                checked={column.getIsVisible()}
+                                onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                            >
+                                {column.id}
+                            </DropdownMenuCheckboxItem>
+                        ))}
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
+
+            {/* Table */}
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => {
-                                    return (
-                                        <TableHead key={header.id}>
-                                            {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                                        </TableHead>
-                                    );
-                                })}
+                                {headerGroup.headers.map((header) => (
+                                    <TableHead key={header.id} onClick={() => handleSort(header.id)} className="cursor-pointer">
+                                        {flexRender(header.column.columnDef.header, header.getContext())}
+                                        {filters.sort === header.id && (filters.direction === 'asc' ? ' 🔼' : ' 🔽')}
+                                    </TableHead>
+                                ))}
                             </TableRow>
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                        {data.length ? (
                             table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                <TableRow key={row.id}>
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                                     ))}
@@ -94,18 +138,25 @@ const BaseTable = <TData, TValue>({ columns, data }: BaseTableProps<TData, TValu
                     </TableBody>
                 </Table>
             </div>
+
+            {/* Pagination */}
             <div className="flex items-center justify-end space-x-2 py-4">
-                <div className="flex-1 text-sm text-muted-foreground">
-                    {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
-                </div>
-                <div className="space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-                        Previous
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-                        Next
-                    </Button>
-                </div>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(pagination.current_page - 1)}
+                    disabled={pagination.current_page <= 1}
+                >
+                    Previous
+                </Button>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(pagination.current_page + 1)}
+                    disabled={pagination.current_page >= pagination.last_page}
+                >
+                    Next
+                </Button>
             </div>
         </div>
     );
