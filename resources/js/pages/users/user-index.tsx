@@ -15,11 +15,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const columns: ColumnDef<User>[] = [
     {
-        accessorKey: 'id',
-        header: 'ID',
-        cell: ({ row }) => <span>{row.getValue('id')}</span>,
-    },
-    {
         accessorKey: 'name',
         header: 'Name',
         cell: ({ row }) => <span>{row.getValue('name')}</span>,

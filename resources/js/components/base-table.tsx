@@ -1,10 +1,12 @@
+import { cn, debounce } from '@/lib/utils';
 import { FilterData } from '@/types/filter';
 import { Pagination } from '@/types/pagination';
 import { router } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowUpDown, ChevronDown } from 'lucide-react';
+import { useCallback, useState } from 'react';
 import { Button } from './ui/button';
+import { Checkbox } from './ui/checkbox';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
@@ -20,29 +22,52 @@ interface BaseTableProps<TData, TValue> {
 const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeName }: BaseTableProps<TData, TValue>) => {
     const [search, setSearch] = useState(filters.keyword || '');
 
+    const dynamicColumns: ColumnDef<TData, TValue>[] = [
+        {
+            id: 'select',
+            header: ({ table }) => (
+                <Checkbox
+                    checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+                    onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                    aria-label="Select all"
+                />
+            ),
+            cell: ({ row }) => (
+                <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />
+            ),
+            enableSorting: false,
+            enableHiding: false,
+        },
+        ...columns,
+    ];
+
     const table = useReactTable({
         data,
-        columns,
+        columns: dynamicColumns,
         getCoreRowModel: getCoreRowModel(), // No client-side row model
         manualSorting: true,
         manualPagination: true,
     });
 
     // Handle Search
-    const handleSearch = (value: string) => {
-        setSearch(value);
-        router.get(
-            route(routeName),
-            {
-                keyword: value,
-                sort: filters.sort,
-                direction: filters.direction,
-                page: 1,
-                limit: filters.limit,
-            },
-            { preserveState: true, replace: true },
-        );
-    };
+    const handleSearch = useCallback(
+        debounce((value: string) => {
+            setSearch(value);
+            console.log(value);
+            router.get(
+                route(routeName),
+                {
+                    keyword: value,
+                    sort: filters.sort,
+                    direction: filters.direction,
+                    page: 1,
+                    limit: filters.limit,
+                },
+                { preserveState: true, replace: true },
+            );
+        }, 500),
+        [],
+    );
 
     // Handle Sorting
     const handleSort = (columnId: string) => {
@@ -94,7 +119,14 @@ const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeNam
         <div className="w-full overflow-x-auto">
             {/* Search & Column Toggle */}
             <div className="flex items-center py-4">
-                <Input placeholder="Search..." value={search} onChange={(e) => handleSearch(e.target.value)} className="max-w-sm" />
+                <Input
+                    placeholder="Search..."
+                    defaultValue={search}
+                    onChange={(e) => {
+                        handleSearch(e.target.value);
+                    }}
+                    className="max-w-sm"
+                />
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -124,9 +156,16 @@ const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeNam
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id} onClick={() => handleSort(header.id)} className="cursor-pointer">
-                                        {flexRender(header.column.columnDef.header, header.getContext())}
-                                        {filters.sort === header.id && (filters.direction === 'asc' ? ' 🔼' : ' 🔽')}
+                                    <TableHead key={header.id}>
+                                        <div
+                                            onClick={() => header.column.getCanSort() && handleSort(header.id)}
+                                            className={cn('py-2', header.column.getCanSort() && 'cursor-pointer', 'group flex items-center gap-2')}
+                                        >
+                                            {flexRender(header.column.columnDef.header, header.getContext())}
+                                            {header.column.getCanSort() && (
+                                                <ArrowUpDown className="h-4 w-4 opacity-45 duration-300 group-hover:opacity-100" />
+                                            )}
+                                        </div>
                                     </TableHead>
                                 ))}
                             </TableRow>
@@ -143,7 +182,7 @@ const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeNam
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
+                                <TableCell colSpan={dynamicColumns.length} className="h-25 text-center">
                                     No results.
                                 </TableCell>
                             </TableRow>
