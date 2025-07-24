@@ -135,16 +135,20 @@ const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeNam
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        {table.getAllColumns().map((column) => (
-                            <DropdownMenuCheckboxItem
-                                key={column.id}
-                                className="capitalize"
-                                checked={column.getIsVisible()}
-                                onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                            >
-                                {column.id}
-                            </DropdownMenuCheckboxItem>
-                        ))}
+                        {table.getAllColumns().map((column) => {
+                            return (
+                                column.getCanHide() && (
+                                    <DropdownMenuCheckboxItem
+                                        key={column.id}
+                                        className="capitalize"
+                                        checked={column.getIsVisible()}
+                                        onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                                    >
+                                        {column.id}
+                                    </DropdownMenuCheckboxItem>
+                                )
+                            );
+                        })}
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
