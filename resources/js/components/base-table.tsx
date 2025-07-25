@@ -4,7 +4,7 @@ import { Pagination } from '@/types/pagination';
 import { router } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { ArrowUpDown, ChevronDown } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from './ui/dropdown-menu';
@@ -50,10 +50,9 @@ const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeNam
     });
 
     // Handle Search
-    const handleSearch = useCallback(
-        debounce((value: string) => {
+    const handleSearch = useMemo(() => {
+        return debounce((value: string) => {
             setSearch(value);
-            console.log(value);
             router.get(
                 route(routeName),
                 {
@@ -65,9 +64,8 @@ const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeNam
                 },
                 { preserveState: true, replace: true },
             );
-        }, 500),
-        [],
-    );
+        }, 500);
+    }, [filters.sort, filters.direction, filters.limit, routeName]);
 
     // Handle Sorting
     const handleSort = (columnId: string) => {
