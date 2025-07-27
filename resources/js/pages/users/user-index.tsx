@@ -7,6 +7,7 @@ import { BreadcrumbItem } from '@/types';
 import { DataTableRowAction } from '@/types/data-table';
 import { FilterData } from '@/types/filter';
 import { Pagination } from '@/types/pagination';
+import { Role } from '@/types/role';
 import { Head } from '@inertiajs/react';
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 import { ColumnDef } from '@tanstack/react-table';
@@ -36,6 +37,26 @@ const getUserColumns = ({ setRowAction }: UserTableColumnsProps): ColumnDef<User
             accessorKey: 'email',
             header: 'Email',
             cell: ({ row }) => <span>{row.getValue('email')}</span>,
+        },
+        {
+            accessorKey: 'roles',
+            header: 'Roles',
+            cell: ({ row }) => {
+                const roles = row.original.roles || [];
+                return (
+                    <div className="flex flex-wrap gap-1">
+                        {roles.length > 0 ? (
+                            roles.map((role) => (
+                                <span key={role.id} className="rounded bg-gray-200 px-2 py-1 text-xs font-semibold text-gray-700">
+                                    {role.name}
+                                </span>
+                            ))
+                        ) : (
+                            <span className="text-gray-400 italic">No role</span>
+                        )}
+                    </div>
+                );
+            },
         },
         {
             accessorKey: 'created_at',
@@ -71,6 +92,7 @@ interface User {
     name: string;
     email: string;
     created_at: string;
+    roles: Role[];
 }
 
 interface UserPageProps {

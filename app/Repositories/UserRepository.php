@@ -52,14 +52,6 @@ class UserRepository implements UserRepositoryInterface{
     {
         $query = User::query();
 
-        if(!empty($keyword))
-        {
-            $query->where(function ($q) use ($keyword){
-                $q->where('name', 'like', "%{$keyword}%")
-                  ->orWhere('email', 'like', "%{$keyword}%");
-            });
-        }
-
         $allowedSortFields = ['name', 'email', 'created_at'];
         
         if(in_array($sortField, $allowedSortFields))
@@ -67,6 +59,6 @@ class UserRepository implements UserRepositoryInterface{
             $query->orderBy($sortField, $sortDirection);
         }
 
-        return $query->paginate($limit);
+        return $query->with('roles')->search($keyword)->paginate($limit);
     }
 }
