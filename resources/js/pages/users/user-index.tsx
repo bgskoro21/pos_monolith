@@ -99,14 +99,17 @@ interface UserPageProps {
     users: {
         data: User[];
     } & Pagination;
+    roles: Role[];
     filters: FilterData;
 }
 
-const UserPage = ({ users, filters }: UserPageProps) => {
+const UserPage = ({ users, roles, filters }: UserPageProps) => {
     const [rowAction, setRowAction] = useState<DataTableRowAction<User> | null>(null);
     const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
 
     const columns = useMemo(() => getUserColumns({ setRowAction }), [setRowAction]);
+
+    console.log(roles);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
