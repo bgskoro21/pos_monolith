@@ -1,7 +1,7 @@
 import BaseTable from '@/components/base-table';
 import { getSelectColumn } from '@/components/table/utils';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { DataTableRowAction } from '@/types/data-table';
@@ -10,7 +10,7 @@ import { Pagination } from '@/types/pagination';
 import { Head } from '@inertiajs/react';
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 import { ColumnDef } from '@tanstack/react-table';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Pencil, Trash } from 'lucide-react';
 import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -46,14 +46,20 @@ const getUserColumns = ({ setRowAction }: UserTableColumnsProps): ColumnDef<User
             id: 'actions',
             header: 'Action',
             cell: ({ row }) => (
-                <>
+                <div className="space-x-2">
+                    <Button
+                        onClick={() => setRowAction({ row, variant: 'delete' })}
+                        className="cursor-pointer bg-blue-500 text-white duration-200 hover:bg-blue-600 hover:opacity-90"
+                    >
+                        <Pencil />
+                    </Button>
                     <Button
                         onClick={() => setRowAction({ row, variant: 'delete' })}
                         className="cursor-pointer bg-red-500 text-white duration-200 hover:bg-red-600 hover:opacity-90"
                     >
-                        Delete
+                        <Trash />
                     </Button>
-                </>
+                </div>
             ),
             enableHiding: false,
         },
@@ -84,7 +90,7 @@ const UserPage = ({ users, filters }: UserPageProps) => {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Users" />
             <div className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="mb-3 flex items-center justify-between">
                     <h1 className="text-4xl font-bold">Users</h1>
                 </div>
                 <BaseTable
@@ -97,6 +103,23 @@ const UserPage = ({ users, filters }: UserPageProps) => {
                 >
                     {(table) => (
                         <>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild className="cursor-pointer">
+                                    <Button variant="outline" className="ml-auto">
+                                        Actions <ChevronDown />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem
+                                        onSelect={() => {
+                                            console.log(selectedUsers);
+                                        }}
+                                        className="cursor-pointer"
+                                    >
+                                        <Trash /> Delete
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild className="cursor-pointer">
                                     <Button variant="outline" className="ml-auto">
