@@ -1,13 +1,16 @@
 import BaseTable from '@/components/base-table';
 import { getSelectColumn } from '@/components/table/utils';
 import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { DataTableRowAction } from '@/types/data-table';
 import { FilterData } from '@/types/filter';
 import { Pagination } from '@/types/pagination';
 import { Head } from '@inertiajs/react';
+import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 import { ColumnDef } from '@tanstack/react-table';
+import { ChevronDown } from 'lucide-react';
 import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -81,6 +84,9 @@ const UserPage = ({ users, filters }: UserPageProps) => {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Users" />
             <div className="p-4">
+                <div className="flex items-center justify-between">
+                    <h1 className="text-4xl font-bold">Users</h1>
+                </div>
                 <BaseTable
                     columns={columns}
                     data={users.data}
@@ -88,7 +94,38 @@ const UserPage = ({ users, filters }: UserPageProps) => {
                     filters={filters}
                     routeName="users.index"
                     onSelectionChange={setSelectedUsers}
-                />
+                >
+                    {(table) => (
+                        <>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild className="cursor-pointer">
+                                    <Button variant="outline" className="ml-auto">
+                                        Columns <ChevronDown />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    {table.getAllColumns().map((column) => {
+                                        return (
+                                            column.getCanHide() && (
+                                                <DropdownMenuCheckboxItem
+                                                    key={column.id}
+                                                    className="capitalize"
+                                                    checked={column.getIsVisible()}
+                                                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                                                >
+                                                    {column.id}
+                                                </DropdownMenuCheckboxItem>
+                                            )
+                                        );
+                                    })}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            <Button variant="default" className="cursor-pointer text-white">
+                                + Add User
+                            </Button>
+                        </>
+                    )}
+                </BaseTable>
             </div>
         </AppLayout>
     );

@@ -3,10 +3,9 @@ import { FilterData } from '@/types/filter';
 import { Pagination } from '@/types/pagination';
 import { router } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { ArrowUpDown, ChevronDown } from 'lucide-react';
+import { ArrowUpDown } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from './ui/button';
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 
@@ -17,9 +16,10 @@ interface BaseTableProps<TData, TValue> {
     filters: FilterData;
     routeName: string;
     onSelectionChange?: (selected: TData[]) => void;
+    children?: (table: ReturnType<typeof useReactTable<TData>>) => React.ReactNode;
 }
 
-const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeName, onSelectionChange }: BaseTableProps<TData, TValue>) => {
+const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeName, onSelectionChange, children }: BaseTableProps<TData, TValue>) => {
     const [search, setSearch] = useState(filters.keyword || '');
     const [rowSelection, setRowSelection] = useState({});
 
@@ -108,7 +108,7 @@ const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeNam
     return (
         <div className="w-full overflow-x-auto">
             {/* Search & Column Toggle */}
-            <div className="flex items-center py-4">
+            <div className="flex items-center justify-between py-4">
                 <Input
                     placeholder="Search..."
                     defaultValue={search}
@@ -118,29 +118,7 @@ const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeNam
                     className="max-w-sm"
                 />
 
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="ml-auto">
-                            Columns <ChevronDown />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        {table.getAllColumns().map((column) => {
-                            return (
-                                column.getCanHide() && (
-                                    <DropdownMenuCheckboxItem
-                                        key={column.id}
-                                        className="capitalize"
-                                        checked={column.getIsVisible()}
-                                        onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                                    >
-                                        {column.id}
-                                    </DropdownMenuCheckboxItem>
-                                )
-                            );
-                        })}
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex items-center gap-2">{children?.(table)}</div>
             </div>
 
             {/* Table */}
