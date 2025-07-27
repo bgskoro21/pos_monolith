@@ -4,9 +4,8 @@ import { Pagination } from '@/types/pagination';
 import { router } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { ArrowUpDown, ChevronDown } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from './ui/button';
-import { Checkbox } from './ui/checkbox';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
@@ -17,37 +16,30 @@ interface BaseTableProps<TData, TValue> {
     pagination: Pagination;
     filters: FilterData;
     routeName: string;
+    onSelectionChange?: (selected: TData[]) => void;
 }
 
-const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeName }: BaseTableProps<TData, TValue>) => {
+const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeName, onSelectionChange }: BaseTableProps<TData, TValue>) => {
     const [search, setSearch] = useState(filters.keyword || '');
-
-    const dynamicColumns: ColumnDef<TData, TValue>[] = [
-        {
-            id: 'select',
-            header: ({ table }) => (
-                <Checkbox
-                    checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-                    onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                    aria-label="Select all"
-                />
-            ),
-            cell: ({ row }) => (
-                <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />
-            ),
-            enableSorting: false,
-            enableHiding: false,
-        },
-        ...columns,
-    ];
+    const [rowSelection, setRowSelection] = useState({});
 
     const table = useReactTable({
         data,
-        columns: dynamicColumns,
+        columns: columns,
         getCoreRowModel: getCoreRowModel(), // No client-side row model
         manualSorting: true,
         manualPagination: true,
+        state: {
+            rowSelection,
+        },
+        onRowSelectionChange: setRowSelection,
     });
+
+    useEffect(() => {
+        if (onSelectionChange) {
+            onSelectionChange(table.getSelectedRowModel().rows.map((row) => row.original));
+        }
+    }, [rowSelection, onSelectionChange, table]);
 
     // Handle Search
     const handleSearch = useMemo(() => {
@@ -184,7 +176,7 @@ const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeNam
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={dynamicColumns.length} className="h-25 text-center">
+                                <TableCell colSpan={columns.length} className="h-25 text-center">
                                     No results.
                                 </TableCell>
                             </TableRow>
