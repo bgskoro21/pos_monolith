@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\StoreUserRequest;
 use App\Interfaces\Services\RoleServiceInterface;
 use App\Interfaces\Services\UserServiceInterface;
 use Illuminate\Http\Request;
@@ -28,5 +29,12 @@ class UserController extends Controller
             "roles" => $roles,
             "filters" => $filters,
         ]);
+    }
+
+    public function store(StoreUserRequest $request)
+    {
+        $this->userService->store($request->validated());
+
+        return redirect()->route('users.index')->with('success', 'User created successfully.');
     }
 }

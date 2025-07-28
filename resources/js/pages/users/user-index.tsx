@@ -1,4 +1,5 @@
 import BaseTable from '@/components/base-table';
+import UserModal from '@/components/modals/user-modal';
 import { getSelectColumn } from '@/components/table/utils';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
@@ -70,7 +71,7 @@ const getUserColumns = ({ setRowAction }: UserTableColumnsProps): ColumnDef<User
                 <div className="space-x-2">
                     <Button
                         onClick={() => setRowAction({ row, variant: 'delete' })}
-                        className="cursor-pointer bg-blue-500 text-white duration-200 hover:bg-blue-600 hover:opacity-90"
+                        className="cursor-pointer bg-primary text-white duration-200 duration-300 hover:opacity-80"
                     >
                         <Pencil />
                     </Button>
@@ -168,13 +169,19 @@ const UserPage = ({ users, roles, filters }: UserPageProps) => {
                                     })}
                                 </DropdownMenuContent>
                             </DropdownMenu>
-                            <Button variant="default" className="cursor-pointer text-white">
+                            <Button onClick={() => setRowAction({ variant: 'create' })} variant="default" className="cursor-pointer text-white">
                                 + Add User
                             </Button>
                         </>
                     )}
                 </BaseTable>
             </div>
+            <UserModal
+                open={rowAction?.variant == 'create' || rowAction?.variant == 'update'}
+                onOpenChange={() => setRowAction(null)}
+                mode={rowAction?.variant == 'create' ? 'create' : 'update'}
+                roles={roles}
+            />
         </AppLayout>
     );
 };

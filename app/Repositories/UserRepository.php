@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class UserRepository implements UserRepositoryInterface{
-    public function create(array $data)
+    public function register(array $data)
     {
         try
         {
@@ -60,5 +60,10 @@ class UserRepository implements UserRepositoryInterface{
         }
 
         return $query->with('roles')->search($keyword)->paginate($limit);
+    }
+
+    public function store(array $data)
+    {
+        return User::create($data);
     }
 }

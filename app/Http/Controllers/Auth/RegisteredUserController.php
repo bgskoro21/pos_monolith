@@ -34,7 +34,7 @@ class RegisteredUserController extends Controller
      */
     public function store(RegisterRequest $request): RedirectResponse
     {
-        $user = $this->userService->create($request->only('company_name','name', 'email', 'password'));
+        $user = $this->userService->register($request->only('company_name','name', 'email', 'password'));
 
         event(new Registered($user));
 
