@@ -62,7 +62,7 @@ class UserRepository implements UserRepositoryInterface{
         return $query->with('roles')->search($keyword)->paginate($limit);
     }
 
-    public function store(array $data)
+    public function store(array $data) : User
     {
         return User::create($data);
     }

@@ -11,4 +11,9 @@ class RoleRepository implements RoleRepositoryInterface
     {
         return Role::all(['id', 'name']);
     }
+
+    public function getRolesNameByIds(array $roleIds): array
+    {
+        return Role::whereIn('id', $roleIds)->pluck('name')->toArray();
+    }
 }

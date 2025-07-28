@@ -34,8 +34,6 @@ const UserModal = ({ open, onOpenChange, mode, userData, roles }: UserModalProps
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        console.log(data);
-
         if (mode === 'create') {
             post(route('users.store'), {
                 onSuccess: () => onOpenChange(false), // Tutup modal setelah sukses
