@@ -105,6 +105,33 @@ const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeNam
         );
     };
 
+    // pagination number list
+    function getPaginationPages(current: number, last: number, delta: number = 2) {
+        const range = [];
+        const rangeWithDots = [];
+        let l: number | null = null;
+
+        for (let i = 1; i <= last; i++) {
+            if (i === 1 || i === last || (i >= current - delta && i <= current + delta)) {
+                range.push(i);
+            }
+        }
+
+        for (const i of range) {
+            if (l) {
+                if (i - l === 2) {
+                    rangeWithDots.push(l + 1);
+                } else if (i - l !== 1) {
+                    rangeWithDots.push('...');
+                }
+            }
+            rangeWithDots.push(i);
+            l = i;
+        }
+
+        return rangeWithDots;
+    }
+
     return (
         <div className="w-full overflow-x-auto">
             {/* Search & Column Toggle */}
@@ -186,6 +213,23 @@ const BaseTable = <TData, TValue>({ columns, data, pagination, filters, routeNam
                     >
                         Previous
                     </Button>
+                    {/* Page Numbers */}
+                    {getPaginationPages(pagination.current_page, pagination.last_page).map((page, index) =>
+                        page === '...' ? (
+                            <span key={index} className="px-2">
+                                ...
+                            </span>
+                        ) : (
+                            <Button
+                                key={page}
+                                variant={page === pagination.current_page ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => handlePageChange(Number(page))}
+                            >
+                                {page}
+                            </Button>
+                        ),
+                    )}
                     <Button
                         variant="outline"
                         size="sm"
