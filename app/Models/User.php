@@ -39,6 +39,8 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    protected $guard_name = 'web';
+
     /**
      * Get the attributes that should be cast.
      *
@@ -50,11 +52,6 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
-    }
-
-    public function roles()
-    {
-        return $this->belongsToMany(Role::class, 'model_has_roles', 'model_id', 'role_id')->where('model_type', self::class);
     }
 
     public function scopeSearch(Builder $query, ?string $keyword): Builder
