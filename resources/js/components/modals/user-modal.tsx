@@ -124,7 +124,6 @@ const UserModal = ({ open, onOpenChange, mode, userData, roles }: UserModalProps
                                 label: role.name,
                                 value: role.id.toString(),
                             }))}
-                            value={selectedRoleValues}
                             defaultValue={selectedRoleValues}
                             onValueChange={(selectedValues) => setData('roles', selectedValues.map(Number))}
                         />
