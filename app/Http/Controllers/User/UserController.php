@@ -4,8 +4,10 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 use App\Interfaces\Services\RoleServiceInterface;
 use App\Interfaces\Services\UserServiceInterface;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -36,5 +38,12 @@ class UserController extends Controller
         $this->userService->store($request->validated());
 
         return redirect()->route('users.index')->with('success', 'User created successfully.');
+    }
+
+    public function update(User $user, UpdateUserRequest $request)
+    {
+        $this->userService->update($user, $request->validated());
+
+        return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }
 }

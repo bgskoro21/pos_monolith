@@ -70,7 +70,7 @@ const getUserColumns = ({ setRowAction }: UserTableColumnsProps): ColumnDef<User
             cell: ({ row }) => (
                 <div className="space-x-2">
                     <Button
-                        onClick={() => setRowAction({ row, variant: 'delete' })}
+                        onClick={() => setRowAction({ row, variant: 'update' })}
                         className="cursor-pointer bg-primary text-white duration-200 duration-300 hover:opacity-80"
                     >
                         <Pencil />
@@ -109,8 +109,6 @@ const UserPage = ({ users, roles, filters }: UserPageProps) => {
     const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
 
     const columns = useMemo(() => getUserColumns({ setRowAction }), [setRowAction]);
-
-    console.log(roles);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -181,6 +179,7 @@ const UserPage = ({ users, roles, filters }: UserPageProps) => {
                 onOpenChange={() => setRowAction(null)}
                 mode={rowAction?.variant == 'create' ? 'create' : 'update'}
                 roles={roles}
+                userData={rowAction?.row?.original ?? null}
             />
         </AppLayout>
     );

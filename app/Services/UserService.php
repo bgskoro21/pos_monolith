@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Interfaces\Repositories\RoleRepositoryInterface;
 use App\Interfaces\Repositories\UserRepositoryInterface;
 use App\Interfaces\Services\UserServiceInterface;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -17,8 +18,19 @@ class UserService implements UserServiceInterface
 
     private function prepareUserData(array $data): array
     {
-        $data['password'] = Hash::make($data['password']);
-        $data['username'] = $data['username'] ?? Str::before($data['email'], '@');
+        // Handle password
+        if (!empty($data['password'])) 
+        {
+            $data['password'] = Hash::make($data['password']);
+        } else 
+        {
+            unset($data['password']);
+        }
+
+        // Handle username
+        if (isset($data['email'])) {
+            $data['username'] = $data['username'] ?? Str::before($data['email'], '@');
+        }
 
         return $data;
     }
@@ -52,5 +64,22 @@ class UserService implements UserServiceInterface
         }
 
         return $user;
+    }
+
+    public function update(User $user, array $data): User
+    {
+        $roles = $data['roles'] ?? null;
+        unset($data['roles']);
+
+        $data = $this->prepareUserData($data);
+
+        $this->userRepository->update($user, $data);
+
+        if (!empty($roles)) 
+        {
+            $user->syncRoles($roles);
+        }
+
+        return $user->refresh();
     }
 }

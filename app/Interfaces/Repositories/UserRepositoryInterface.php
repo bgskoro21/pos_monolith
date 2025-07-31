@@ -9,4 +9,5 @@ interface UserRepositoryInterface
     public function register(array $data);
     public function getPaginatedUsers(int $limit, ?string $keyword, ?string $sortField, ?string $sortDirection);
     public function store(array $data) : User;
+    public function update(User $user, array $data): User;
 }

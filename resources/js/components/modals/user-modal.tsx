@@ -1,5 +1,6 @@
 import { Role } from '@/types/role';
 import { useForm } from '@inertiajs/react';
+import { useEffect } from 'react';
 import { MultiSelect } from '../multi-select';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
@@ -14,14 +15,36 @@ interface UserModalProps {
 }
 
 const UserModal = ({ open, onOpenChange, mode, userData, roles }: UserModalProps) => {
-    const { data, setData, post, put, processing, errors } = useForm({
-        id: userData?.id ?? undefined,
-        name: userData?.name ?? '',
-        email: userData?.email ?? '',
-        roles: userData?.roles.map((r) => r.id) ?? [], // roles sebagai array ID
+    const { data, setData, post, put, processing, errors, reset } = useForm<{
+        id: number | undefined;
+        name: string;
+        email: string;
+        roles: number[];
+        password: string;
+        password_confirmation: string;
+    }>({
+        id: undefined,
+        name: '',
+        email: '',
+        roles: [] as number[],
         password: '',
         password_confirmation: '',
     });
+
+    useEffect(() => {
+        if (userData && open) {
+            setData({
+                id: userData.id ?? undefined,
+                name: userData.name ?? '',
+                email: userData.email ?? '',
+                roles: (userData.roles ?? []).map((r) => r.id),
+                password: '',
+                password_confirmation: '',
+            });
+        } else {
+            reset();
+        }
+    }, [setData, userData, open, reset]);
 
     const title = mode === 'create' ? 'Add User' : 'Edit User';
 
@@ -46,12 +69,15 @@ const UserModal = ({ open, onOpenChange, mode, userData, roles }: UserModalProps
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+        <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
                 onInteractOutside={(e) => {
                     const target = e.target as HTMLElement;
-                    if (target.closest('[data-multi-select]')) {
-                        e.preventDefault();
+                    if (
+                        target.closest('[data-multi-select]') || // wrapper
+                        target.closest('.multi-select-dropdown') // popper dropdown
+                    ) {
+                        e.preventDefault(); // jangan tutup modal
                     }
                 }}
             >
@@ -86,18 +112,17 @@ const UserModal = ({ open, onOpenChange, mode, userData, roles }: UserModalProps
                     </div>
 
                     <div data-multi-select>
-                        <MultiSelect
-                            options={roles.map((role) => ({
-                                label: role.name,
-                                value: role.id.toString(),
-                            }))}
-                            value={data.roles.map((id) => id.toString())}
-                            onValueChange={(selectedValues) => {
-                                const roleIds = selectedValues.map((v) => parseInt(v));
-                                setData('roles', roleIds);
-                            }}
-                            placeholder="Select roles"
-                        />
+                        {roles.length > 0 && (
+                            <MultiSelect
+                                options={roles.map((role) => ({
+                                    label: role.name,
+                                    value: role.id.toString(),
+                                }))}
+                                value={data.roles.map((id) => id.toString())}
+                                onValueChange={(selectedValues) => setData('roles', selectedValues.map(Number))}
+                            />
+                        )}
+
                         {errors.roles && <p className="text-sm text-red-500">{errors.roles}</p>}
                     </div>
 
