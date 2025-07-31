@@ -1,6 +1,6 @@
 import { Role } from '@/types/role';
 import { useForm } from '@inertiajs/react';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { MultiSelect } from '../multi-select';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
@@ -14,37 +14,44 @@ interface UserModalProps {
     roles: Role[];
 }
 
-const UserModal = ({ open, onOpenChange, mode, userData, roles }: UserModalProps) => {
-    const { data, setData, post, put, processing, errors, reset } = useForm<{
-        id: number | undefined;
-        name: string;
-        email: string;
-        roles: number[];
-        password: string;
-        password_confirmation: string;
-    }>({
-        id: undefined,
-        name: '',
-        email: '',
-        roles: [] as number[],
-        password: '',
-        password_confirmation: '',
-    });
+type UserModalFormType = {
+    id?: number;
+    name: string;
+    email: string;
+    roles: number[];
+    password: string;
+    password_confirmation: string;
+};
 
+const UserModal = ({ open, onOpenChange, mode, userData, roles }: UserModalProps) => {
+    const initialForm = useMemo(
+        () => ({
+            id: undefined,
+            name: '',
+            email: '',
+            roles: [] as number[],
+            password: '',
+            password_confirmation: '',
+        }),
+        [],
+    );
+
+    const { data, setData, post, put, processing, errors, reset } = useForm<UserModalFormType>(initialForm);
+
+    // ✅ Sync userData when modal opens
     useEffect(() => {
-        if (userData && open) {
+        if (open && userData) {
             setData({
-                id: userData.id ?? undefined,
-                name: userData.name ?? '',
-                email: userData.email ?? '',
-                roles: (userData.roles ?? []).map((r) => r.id),
-                password: '',
-                password_confirmation: '',
+                ...initialForm,
+                id: userData.id,
+                name: userData.name,
+                email: userData.email,
+                roles: userData.roles?.map((r) => r.id) || [],
             });
         } else {
             reset();
         }
-    }, [setData, userData, open, reset]);
+    }, [open, userData, setData, reset, initialForm]);
 
     const title = mode === 'create' ? 'Add User' : 'Edit User';
 
@@ -57,16 +64,16 @@ const UserModal = ({ open, onOpenChange, mode, userData, roles }: UserModalProps
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (mode === 'create') {
-            post(route('users.store'), {
-                onSuccess: () => onOpenChange(false), // Tutup modal setelah sukses
-            });
-        } else {
-            put(route('users.update', data.id), {
-                onSuccess: () => onOpenChange(false),
-            });
-        }
+        const action = mode === 'create' ? post : put;
+        action(route(mode === 'create' ? 'users.store' : 'users.update', data.id), {
+            onSuccess: () => onOpenChange(false),
+        });
     };
+
+    // Selected Roles
+    const selectedRoleValues = useMemo(() => {
+        return data.roles.map((id) => id.toString());
+    }, [data.roles]);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -112,16 +119,15 @@ const UserModal = ({ open, onOpenChange, mode, userData, roles }: UserModalProps
                     </div>
 
                     <div data-multi-select>
-                        {roles.length > 0 && (
-                            <MultiSelect
-                                options={roles.map((role) => ({
-                                    label: role.name,
-                                    value: role.id.toString(),
-                                }))}
-                                value={data.roles.map((id) => id.toString())}
-                                onValueChange={(selectedValues) => setData('roles', selectedValues.map(Number))}
-                            />
-                        )}
+                        <MultiSelect
+                            options={roles.map((role) => ({
+                                label: role.name,
+                                value: role.id.toString(),
+                            }))}
+                            value={selectedRoleValues}
+                            defaultValue={selectedRoleValues}
+                            onValueChange={(selectedValues) => setData('roles', selectedValues.map(Number))}
+                        />
 
                         {errors.roles && <p className="text-sm text-red-500">{errors.roles}</p>}
                     </div>

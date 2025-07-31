@@ -13,6 +13,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::controller(UserController::class)->group(function(){
         Route::get('/users','index')->name('users.index');
         Route::post('/users','store')->name('users.store');
+        Route::put("/users/{user}", "update")->name('users.update');
     });
 });
 
