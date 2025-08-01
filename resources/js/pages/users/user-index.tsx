@@ -1,8 +1,10 @@
 import BaseTable from '@/components/base-table';
 import UserModal from '@/components/modals/user-modal';
+import ActionsDropdown from '@/components/table/action-dropdown';
 import { getSelectColumn } from '@/components/table/utils';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent } from '@/components/ui/dropdown-menu';
+import { useAlert } from '@/hooks/use-alert';
 import { useDeleteAction } from '@/hooks/use-delete-action';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
@@ -10,7 +12,7 @@ import { DataTableRowAction } from '@/types/data-table';
 import { FilterData } from '@/types/filter';
 import { Pagination } from '@/types/pagination';
 import { Role } from '@/types/role';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 import { ColumnDef } from '@tanstack/react-table';
 import { ChevronDown, Pencil, Trash } from 'lucide-react';
@@ -110,8 +112,17 @@ const UserPage = ({ users, roles, filters }: UserPageProps) => {
     const [rowAction, setRowAction] = useState<DataTableRowAction<User> | null>(null);
     const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
     const deleteAction = useDeleteAction('User');
+    const alert = useAlert();
 
     const columns = useMemo(() => getUserColumns({ setRowAction, deleteUser: deleteAction }), [setRowAction, deleteAction]);
+
+    const handleBulkDelete = async (ids: number[]) => {
+        const confirmed = await alert.confirm('Are you sure?', `You are about to delete ${ids.length} users`);
+
+        if (confirmed) {
+            router.post(route('users.bulk-delete'), { ids });
+        }
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -130,23 +141,7 @@ const UserPage = ({ users, roles, filters }: UserPageProps) => {
                 >
                     {(table) => (
                         <>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild className="cursor-pointer">
-                                    <Button variant="outline" className="ml-auto">
-                                        Actions <ChevronDown />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem
-                                        onSelect={() => {
-                                            console.log(selectedUsers);
-                                        }}
-                                        className="cursor-pointer"
-                                    >
-                                        <Trash /> Delete
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                            <ActionsDropdown selectedItems={selectedUsers.map((user) => user.id)} onDelete={handleBulkDelete} />
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild className="cursor-pointer">
                                     <Button variant="outline" className="ml-auto">

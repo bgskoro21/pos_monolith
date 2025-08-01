@@ -62,6 +62,11 @@ class UserRepository implements UserRepositoryInterface{
         return $query->with('roles')->search($keyword)->paginate($limit);
     }
 
+    public function getByIds(array $ids)
+    {
+        return User::whereIn('id', $ids)->get();
+    }
+
     public function store(array $data) : User
     {
         return User::create($data);
@@ -77,5 +82,10 @@ class UserRepository implements UserRepositoryInterface{
     public function destroy(User $user) : bool
     {
         return (bool) $user->delete();
+    }
+
+    public function bulkDelete(array $userIds)
+    {
+        return User::whereIn('id', $userIds)->delete();
     }
 }

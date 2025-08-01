@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\BulkDeleteUserRequest;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Interfaces\Services\RoleServiceInterface;
@@ -57,5 +58,12 @@ class UserController extends Controller
         }
 
         return redirect()->route('users.index')->with('success', 'User deleted successfully');
+    }
+
+    public function bulkDelete(BulkDeleteUserRequest $request)
+    {
+        $count = $this->userService->bulkDelete($request->validated());
+
+        return redirect()->route('users.index')->with('success', "{$count} users deleted successfully");
     }
 }

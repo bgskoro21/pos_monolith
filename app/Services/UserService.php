@@ -6,6 +6,7 @@ use App\Interfaces\Repositories\RoleRepositoryInterface;
 use App\Interfaces\Repositories\UserRepositoryInterface;
 use App\Interfaces\Services\UserServiceInterface;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -88,5 +89,19 @@ class UserService implements UserServiceInterface
         $user->syncRoles([]);
 
         return (bool) $this->userRepository->destroy($user);
+    }
+
+    public function bulkDelete(array $ids)
+    {
+        return DB::transaction(function () use ($ids){
+            $users = $this->userRepository->getByIds($ids);
+
+            foreach($users as $user)
+            {
+                $user->syncRoles([]);
+            }
+
+            return $this->userRepository->bulkDelete($ids);
+        });
     }
 }
