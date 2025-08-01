@@ -3,6 +3,7 @@ import UserModal from '@/components/modals/user-modal';
 import { getSelectColumn } from '@/components/table/utils';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { useDeleteAction } from '@/hooks/use-delete-action';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { DataTableRowAction } from '@/types/data-table';
@@ -24,9 +25,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface UserTableColumnsProps {
     setRowAction: Dispatch<SetStateAction<DataTableRowAction<User> | null>>;
+    deleteUser: (url: string, name: string) => void;
 }
 
-const getUserColumns = ({ setRowAction }: UserTableColumnsProps): ColumnDef<User>[] => {
+const getUserColumns = ({ setRowAction, deleteUser }: UserTableColumnsProps): ColumnDef<User>[] => {
     return [
         getSelectColumn<User>(),
         {
@@ -76,7 +78,7 @@ const getUserColumns = ({ setRowAction }: UserTableColumnsProps): ColumnDef<User
                         <Pencil />
                     </Button>
                     <Button
-                        onClick={() => setRowAction({ row, variant: 'delete' })}
+                        onClick={() => deleteUser(route('users.destroy', row.original.id), row.original.name)}
                         className="cursor-pointer bg-red-500 text-white duration-200 hover:bg-red-600 hover:opacity-90"
                     >
                         <Trash />
@@ -107,8 +109,9 @@ interface UserPageProps {
 const UserPage = ({ users, roles, filters }: UserPageProps) => {
     const [rowAction, setRowAction] = useState<DataTableRowAction<User> | null>(null);
     const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+    const deleteAction = useDeleteAction('User');
 
-    const columns = useMemo(() => getUserColumns({ setRowAction }), [setRowAction]);
+    const columns = useMemo(() => getUserColumns({ setRowAction, deleteUser: deleteAction }), [setRowAction, deleteAction]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
