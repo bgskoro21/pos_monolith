@@ -10,4 +10,5 @@ interface UserRepositoryInterface
     public function getPaginatedUsers(int $limit, ?string $keyword, ?string $sortField, ?string $sortDirection);
     public function store(array $data) : User;
     public function update(User $user, array $data): User;
+    public function destroy(User $user): bool;
 }

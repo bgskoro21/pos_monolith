@@ -1,3 +1,4 @@
+import { useToast } from '@/hooks/use-toast';
 import { Role } from '@/types/role';
 import { useForm } from '@inertiajs/react';
 import { useEffect, useMemo } from 'react';
@@ -24,6 +25,8 @@ type UserModalFormType = {
 };
 
 const UserModal = ({ open, onOpenChange, mode, userData, roles }: UserModalProps) => {
+    const toast = useToast();
+
     const initialForm = useMemo(
         () => ({
             id: undefined,
@@ -66,7 +69,10 @@ const UserModal = ({ open, onOpenChange, mode, userData, roles }: UserModalProps
 
         const action = mode === 'create' ? post : put;
         action(route(mode === 'create' ? 'users.store' : 'users.update', data.id), {
-            onSuccess: () => onOpenChange(false),
+            onSuccess: () => {
+                toast.success('User updated successfully');
+                onOpenChange(false);
+            },
         });
     };
 

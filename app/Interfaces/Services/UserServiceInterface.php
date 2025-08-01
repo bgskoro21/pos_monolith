@@ -10,4 +10,5 @@ interface UserServiceInterface
     public function getPaginatedUsers(array $filters);
     public function store(array $data);
     public function update(User $user, array $data);
+    public function destroy(User $user): bool;
 }

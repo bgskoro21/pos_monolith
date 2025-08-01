@@ -82,4 +82,11 @@ class UserService implements UserServiceInterface
 
         return $user->refresh();
     }
+
+    public function destroy(User $user) : bool
+    {
+        $user->syncRoles([]);
+
+        return (bool) $this->userRepository->destroy($user);
+    }
 }

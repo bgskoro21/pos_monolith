@@ -46,4 +46,16 @@ class UserController extends Controller
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }
+
+    public function destroy(User $user)
+    {
+        $result = $this->userService->destroy($user);
+
+        if(!$result)
+        {
+            return redirect()->route('users.index')->with('error', 'User deleted error!');
+        }
+
+        return redirect()->route('users.index')->with('success', 'User deleted successfully');
+    }
 }

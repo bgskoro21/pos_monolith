@@ -14,6 +14,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/users','index')->name('users.index');
         Route::post('/users','store')->name('users.store');
         Route::put("/users/{user}", "update")->name('users.update');
+        Route::delete("/users/{user}", "destroy")->name('users.destroy');
     });
 });
 
