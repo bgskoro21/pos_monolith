@@ -4,7 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use Illuminate\Database\Eloquent\Builder;
+use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -14,7 +14,7 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles, BelongsToTenant;
+    use HasFactory, Notifiable, HasRoles, BelongsToTenant, Searchable;
 
     /**
      * The attributes that are mass assignable.
@@ -53,19 +53,8 @@ class User extends Authenticatable
         ];
     }
 
-    public function scopeSearch(Builder $query, ?string $keyword): Builder
-    {
-        if(!empty($keyword))
-        {
-            $query->where(function ($q) use ($keyword){
-                $q->where('name', 'like', "%{$keyword}%")
-                  ->orWhere('email', 'like', "%{$keyword}%")
-                  ->orWhereHas('roles', function($roleQuery) use ($keyword){
-                    $roleQuery->where('name', 'like', "%{$keyword}%");
-                  });
-            });
-        }
-
-        return $query;
-    }
+    protected $searchable = [
+        'columns' => ['name', 'email'],
+        'relations' => ['roles' => ['name']]
+    ];
 }
