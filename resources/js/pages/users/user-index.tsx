@@ -1,9 +1,9 @@
 import BaseTable from '@/components/base-table';
 import UserModal from '@/components/modals/user-modal';
 import ActionsDropdown from '@/components/table/action-dropdown';
+import DropdownHideColumn from '@/components/table/hide-column-dropdown';
 import { getSelectColumn } from '@/components/table/utils';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent } from '@/components/ui/dropdown-menu';
 import { useAlert } from '@/hooks/use-alert';
 import { useDeleteAction } from '@/hooks/use-delete-action';
 import AppLayout from '@/layouts/app-layout';
@@ -13,9 +13,8 @@ import { FilterData } from '@/types/filter';
 import { Pagination } from '@/types/pagination';
 import { Role } from '@/types/role';
 import { Head, router } from '@inertiajs/react';
-import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 import { ColumnDef } from '@tanstack/react-table';
-import { ChevronDown, Pencil, Trash } from 'lucide-react';
+import { Pencil, Trash } from 'lucide-react';
 import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -142,29 +141,7 @@ const UserPage = ({ users, roles, filters }: UserPageProps) => {
                     {(table) => (
                         <>
                             <ActionsDropdown selectedItems={selectedUsers.map((user) => user.id)} onDelete={handleBulkDelete} />
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild className="cursor-pointer">
-                                    <Button variant="outline" className="ml-auto">
-                                        Columns <ChevronDown />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    {table.getAllColumns().map((column) => {
-                                        return (
-                                            column.getCanHide() && (
-                                                <DropdownMenuCheckboxItem
-                                                    key={column.id}
-                                                    className="capitalize"
-                                                    checked={column.getIsVisible()}
-                                                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                                                >
-                                                    {column.id}
-                                                </DropdownMenuCheckboxItem>
-                                            )
-                                        );
-                                    })}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                            <DropdownHideColumn table={table} />
                             <Button onClick={() => setRowAction({ variant: 'create' })} variant="default" className="cursor-pointer text-white">
                                 + Add User
                             </Button>
