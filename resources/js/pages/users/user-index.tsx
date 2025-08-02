@@ -6,6 +6,7 @@ import { getSelectColumn } from '@/components/table/utils';
 import { Button } from '@/components/ui/button';
 import { useAlert } from '@/hooks/use-alert';
 import { useDeleteAction } from '@/hooks/use-delete-action';
+import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { DataTableRowAction } from '@/types/data-table';
@@ -112,6 +113,7 @@ const UserPage = ({ users, roles, filters }: UserPageProps) => {
     const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
     const deleteAction = useDeleteAction('User');
     const alert = useAlert();
+    const toast = useToast();
 
     const columns = useMemo(() => getUserColumns({ setRowAction, deleteUser: deleteAction }), [setRowAction, deleteAction]);
 
@@ -119,7 +121,15 @@ const UserPage = ({ users, roles, filters }: UserPageProps) => {
         const confirmed = await alert.confirm('Are you sure?', `You are about to delete ${ids.length} users`);
 
         if (confirmed) {
-            router.post(route('users.bulk-delete'), { ids });
+            router.post(
+                route('users.bulk-delete'),
+                { ids },
+                {
+                    onSuccess: () => {
+                        toast.success(`${ids.length} users deleted successfully!`);
+                    },
+                },
+            );
         }
     };
 
