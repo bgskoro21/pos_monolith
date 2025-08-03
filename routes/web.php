@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Products\ProductCategoryController;
 use App\Http\Controllers\User\UserController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +17,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put("/users/{user}", "update")->name('users.update');
         Route::delete("/users/{user}", "destroy")->name('users.destroy');
         Route::post("/users/bulk-delete", "bulkDelete")->name('users.bulk-delete');
+    });
+
+    Route::controller(ProductCategoryController::class)->group(function(){
+        Route::get("/categories", "index")->name('categories.index');
     });
 });
 

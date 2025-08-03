@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Repositories;
+
 use App\Interfaces\Repositories\ProductCategoryRepositoryInterface;
 use App\Models\ProductCategory;
 
@@ -18,7 +20,7 @@ class ProductCategoryRepository implements ProductCategoryRepositoryInterface
 
         if(in_array($sortField, $allowedSortFields))
         {
-            $query->orderBy($sortField, $allowedSortFields);
+            $query->orderBy($sortField, $sortDirection);
         }
 
         return $query->search($keyword)->paginate($limit);
