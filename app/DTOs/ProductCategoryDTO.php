@@ -10,7 +10,7 @@ class ProductCategoryDTO
     )
     {}
 
-    public function fromArray(array $data): self
+    public static function fromArray(array $data): self
     {
         return new self(
             name: $data['name'],

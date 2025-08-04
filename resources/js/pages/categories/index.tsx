@@ -1,5 +1,8 @@
 import BaseTable from '@/components/base-table';
+import CategoryModal from '@/components/modals/category-modal';
+import DropdownHideColumn from '@/components/table/hide-column-dropdown';
 import { getSelectColumn } from '@/components/table/utils';
+import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { DataTableRowAction } from '@/types/data-table';
@@ -49,7 +52,21 @@ const ProductCategoryPage = ({ categories, filters }: CategoryPageProps) => {
                     filters={filters}
                     routeName="categories.index"
                     onSelectionChange={setSelectedCategories}
-                ></BaseTable>
+                >
+                    {(table) => (
+                        <>
+                            <DropdownHideColumn table={table} />
+                            <Button onClick={() => setRowAction({ variant: 'create' })} variant="default" className="cursor-pointer text-white">
+                                + Add Category
+                            </Button>
+                        </>
+                    )}
+                </BaseTable>
+                <CategoryModal
+                    open={rowAction?.variant == 'create' || rowAction?.variant == 'update'}
+                    onOpenChange={() => setRowAction(null)}
+                    mode={rowAction?.variant == 'create' ? 'create' : 'update'}
+                />
             </div>
         </AppLayout>
     );

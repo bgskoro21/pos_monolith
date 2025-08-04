@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Products;
 
 use App\DTOs\PaginationFilterDTO;
+use App\DTOs\ProductCategoryDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Product\StoreProductCategoryRequest;
 use App\Interfaces\Services\ProductCategoryServiceInterface;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -24,5 +26,14 @@ class ProductCategoryController extends Controller
             "categories" => $categories,
             "filters" => $pagination,
         ]);
+    }
+
+    public function store(StoreProductCategoryRequest $request)
+    {
+        $categoryDto = ProductCategoryDTO::fromArray($request->validated());
+
+        $this->productCategoryService->store($categoryDto);
+
+        return redirect()->route('categories.index');
     }
 }

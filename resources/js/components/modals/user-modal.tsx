@@ -43,7 +43,7 @@ const UserModal = ({ open, onOpenChange, mode, userData, roles }: UserModalProps
 
     // ✅ Sync userData when modal opens
     useEffect(() => {
-        if (open && userData) {
+        if (userData) {
             setData({
                 ...initialForm,
                 id: userData.id,
@@ -51,10 +51,8 @@ const UserModal = ({ open, onOpenChange, mode, userData, roles }: UserModalProps
                 email: userData.email,
                 roles: userData.roles?.map((r) => r.id) || [],
             });
-        } else {
-            reset();
         }
-    }, [open, userData, setData, reset, initialForm]);
+    }, [userData, setData, reset, initialForm]);
 
     const title = mode === 'create' ? 'Add User' : 'Edit User';
 
@@ -71,6 +69,7 @@ const UserModal = ({ open, onOpenChange, mode, userData, roles }: UserModalProps
         action(route(mode === 'create' ? 'users.store' : 'users.update', data.id), {
             onSuccess: () => {
                 toast.success('User updated successfully');
+                reset();
                 onOpenChange(false);
             },
         });

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\PaginationFilterDTO;
+use App\DTOs\ProductCategoryDTO;
 use App\Interfaces\Repositories\ProductCategoryRepositoryInterface;
 use App\Interfaces\Services\ProductCategoryServiceInterface;
 
@@ -23,8 +24,8 @@ class ProductCategoryService implements ProductCategoryServiceInterface
         return $this->productCategoryRepository->getPaginated($paginationFilter->limit, $paginationFilter->keyword, $paginationFilter->sortField, $paginationFilter->sortDirection);
     }
 
-    public function store(array $data)
+    public function store(ProductCategoryDTO $data)
     {
-        return $this->productCategoryRepository->create($data);
+        return $this->productCategoryRepository->create($data->toArray());
     }
 }
