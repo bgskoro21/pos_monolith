@@ -10,6 +10,7 @@ import { FilterData } from '@/types/filter';
 import { Pagination } from '@/types/pagination';
 import { Head } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
+import { Pencil } from 'lucide-react';
 import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -66,6 +67,7 @@ const ProductCategoryPage = ({ categories, filters }: CategoryPageProps) => {
                     open={rowAction?.variant == 'create' || rowAction?.variant == 'update'}
                     onOpenChange={() => setRowAction(null)}
                     mode={rowAction?.variant == 'create' ? 'create' : 'update'}
+                    categoryData={rowAction?.row?.original}
                 />
             </div>
         </AppLayout>
@@ -93,6 +95,27 @@ const getColumns = ({ setRowAction }: CategoryTableColumnsProps): ColumnDef<Cate
             accessorKey: 'created_at',
             header: 'Created At',
             cell: ({ row }) => <span>{new Date(row.getValue('created_at')).toLocaleDateString()}</span>,
+        },
+        {
+            id: 'actions',
+            header: 'Action',
+            cell: ({ row }) => (
+                <div className="space-x-2">
+                    <Button
+                        onClick={() => setRowAction({ row, variant: 'update' })}
+                        className="cursor-pointer bg-primary text-white duration-200 duration-300 hover:opacity-80"
+                    >
+                        <Pencil />
+                    </Button>
+                    {/* <Button
+                        onClick={() => deleteUser(route('users.destroy', row.original.id), row.original.name)}
+                        className="cursor-pointer bg-red-500 text-white duration-200 hover:bg-red-600 hover:opacity-90"
+                    >
+                        <Trash />
+                    </Button> */}
+                </div>
+            ),
+            enableHiding: false,
         },
     ];
 };

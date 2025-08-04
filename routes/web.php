@@ -22,6 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::controller(ProductCategoryController::class)->group(function(){
         Route::get("/categories", "index")->name('categories.index');
         Route::post("/categories", "store")->name('categories.store');
+        Route::put("/categories/{category}", "update")->name('categories.update');
     });
 });
 

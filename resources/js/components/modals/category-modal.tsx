@@ -1,6 +1,6 @@
 import { useToast } from '@/hooks/use-toast';
 import { useForm } from '@inertiajs/react';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Input } from '../ui/input';
@@ -31,6 +31,17 @@ const CategoryModal = ({ open, onOpenChange, mode, categoryData }: CategoryModal
 
     const { data, setData, post, put, processing, errors, reset } = useForm<CategoryModalFormType>(initialForm);
 
+    useEffect(() => {
+        if (categoryData) {
+            setData({
+                ...initialForm,
+                id: categoryData.id,
+                name: categoryData.name,
+                description: categoryData.description,
+            });
+        }
+    }, [categoryData, setData, initialForm]);
+
     const title = mode == 'create' ? 'Add Category' : 'Edit Category';
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -39,7 +50,7 @@ const CategoryModal = ({ open, onOpenChange, mode, categoryData }: CategoryModal
         const action = mode == 'create' ? post : put;
         action(route(mode == 'create' ? 'categories.store' : 'categories.update', data.id), {
             onSuccess: () => {
-                toast.success('Category created successfully');
+                toast.success(`Category ${mode == 'create' ? 'created' : 'updated'} successfully`);
                 reset();
                 onOpenChange();
             },

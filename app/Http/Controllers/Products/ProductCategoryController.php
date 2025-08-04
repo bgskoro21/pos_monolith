@@ -7,6 +7,7 @@ use App\DTOs\ProductCategoryDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Product\StoreProductCategoryRequest;
 use App\Interfaces\Services\ProductCategoryServiceInterface;
+use App\Models\ProductCategory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -35,5 +36,21 @@ class ProductCategoryController extends Controller
         $this->productCategoryService->store($categoryDto);
 
         return redirect()->route('categories.index');
+    }
+
+    public function update(ProductCategory $category, StoreProductCategoryRequest $request)
+    {
+        $categoryDto = ProductCategoryDTO::fromArray($request->validated());
+
+        $this->productCategoryService->update($category, $categoryDto);
+
+        return redirect()->route("categories.index");
+    }
+
+    public function destroy(ProductCategory $category)
+    {
+        $this->productCategoryService->destroy($category);
+
+        return redirect()->route("categories.index");
     }
 }

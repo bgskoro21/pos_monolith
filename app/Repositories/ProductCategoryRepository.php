@@ -30,4 +30,16 @@ class ProductCategoryRepository implements ProductCategoryRepositoryInterface
     {
         return ProductCategory::create($data);
     }
+
+    public function update(ProductCategory $category, array $data)
+    {
+        $category->update($data);
+        
+        return $category->refresh();
+    }
+
+    public function destroy(ProductCategory $category)
+    {
+        return (bool) $category->delete();
+    }
 }
