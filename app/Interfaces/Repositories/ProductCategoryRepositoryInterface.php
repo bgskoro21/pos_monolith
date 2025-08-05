@@ -11,4 +11,5 @@ interface ProductCategoryRepositoryInterface
     public function create(array $data);
     public function update(ProductCategory $category, array $data);
     public function destroy(ProductCategory $category);
+    public function bulkDelete(array $ids);
 }

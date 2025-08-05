@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Interfaces\Repositories\ProductCategoryRepositoryInterface;
 use App\Models\ProductCategory;
+use App\Models\User;
 
 class ProductCategoryRepository implements ProductCategoryRepositoryInterface
 {
@@ -41,5 +42,10 @@ class ProductCategoryRepository implements ProductCategoryRepositoryInterface
     public function destroy(ProductCategory $category)
     {
         return (bool) $category->delete();
+    }
+
+    public function bulkDelete(array $ids)
+    {
+        return ProductCategory::whereIn('id', $ids)->delete();
     }
 }

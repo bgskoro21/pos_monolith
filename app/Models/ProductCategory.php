@@ -5,10 +5,11 @@ namespace App\Models;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 class ProductCategory extends Model
 {
-    use Searchable; 
+    use Searchable, BelongsToTenant; 
 
     protected $guarded = ['id'];
 

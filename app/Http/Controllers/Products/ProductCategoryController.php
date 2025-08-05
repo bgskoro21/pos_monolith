@@ -6,6 +6,7 @@ use App\DTOs\PaginationFilterDTO;
 use App\DTOs\ProductCategoryDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Product\StoreProductCategoryRequest;
+use App\Http\Requests\User\BulkDeleteUserRequest;
 use App\Interfaces\Services\ProductCategoryServiceInterface;
 use App\Models\ProductCategory;
 use Illuminate\Http\Request;
@@ -50,6 +51,13 @@ class ProductCategoryController extends Controller
     public function destroy(ProductCategory $category)
     {
         $this->productCategoryService->destroy($category);
+
+        return redirect()->route("categories.index");
+    }
+
+    public function bulkDelete(BulkDeleteUserRequest $request)
+    {
+        $this->productCategoryService->destroy($request->validated());
 
         return redirect()->route("categories.index");
     }

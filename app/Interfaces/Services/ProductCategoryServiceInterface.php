@@ -13,4 +13,5 @@ interface ProductCategoryServiceInterface
     public function store(ProductCategoryDTO $data);
     public function update(ProductCategory $category, ProductCategoryDTO $data);
     public function destroy(ProductCategory $category);
+    public function bulkDelete(array $ids);
 }

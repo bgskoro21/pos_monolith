@@ -39,4 +39,9 @@ class ProductCategoryService implements ProductCategoryServiceInterface
     {
         return $this->productCategoryRepository->destroy($category);
     }
+
+    public function bulkDelete(array $ids)
+    {
+        return $this->productCategoryRepository->bulkDelete($ids);
+    }
 }

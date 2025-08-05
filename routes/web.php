@@ -24,6 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post("/categories", "store")->name('categories.store');
         Route::put("/categories/{category}", "update")->name('categories.update');
         Route::delete("/categories/{category}", "destroy")->name('categories.destroy');
+        Route::post("/categories/bulk-delete", "bulkDelete")->name("categories.bulk-delete");
     });
 });
 
