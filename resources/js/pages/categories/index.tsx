@@ -3,6 +3,7 @@ import CategoryModal from '@/components/modals/category-modal';
 import DropdownHideColumn from '@/components/table/hide-column-dropdown';
 import { getSelectColumn } from '@/components/table/utils';
 import { Button } from '@/components/ui/button';
+import { useDeleteAction } from '@/hooks/use-delete-action';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { DataTableRowAction } from '@/types/data-table';
@@ -10,7 +11,7 @@ import { FilterData } from '@/types/filter';
 import { Pagination } from '@/types/pagination';
 import { Head } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Pencil } from 'lucide-react';
+import { Pencil, Trash } from 'lucide-react';
 import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -37,7 +38,8 @@ interface CategoryPageProps {
 const ProductCategoryPage = ({ categories, filters }: CategoryPageProps) => {
     const [rowAction, setRowAction] = useState<DataTableRowAction<Category> | null>(null);
     const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
-    const columns = useMemo(() => getColumns({ setRowAction }), [setRowAction]);
+    const deleteAction = useDeleteAction('Category');
+    const columns = useMemo(() => getColumns({ setRowAction, deleteAction }), [setRowAction, deleteAction]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -76,9 +78,10 @@ const ProductCategoryPage = ({ categories, filters }: CategoryPageProps) => {
 
 interface CategoryTableColumnsProps {
     setRowAction: Dispatch<SetStateAction<DataTableRowAction<Category> | null>>;
+    deleteAction: (url: string, name: string) => void;
 }
 
-const getColumns = ({ setRowAction }: CategoryTableColumnsProps): ColumnDef<Category>[] => {
+const getColumns = ({ setRowAction, deleteAction }: CategoryTableColumnsProps): ColumnDef<Category>[] => {
     return [
         getSelectColumn<Category>(),
         {
@@ -107,12 +110,12 @@ const getColumns = ({ setRowAction }: CategoryTableColumnsProps): ColumnDef<Cate
                     >
                         <Pencil />
                     </Button>
-                    {/* <Button
-                        onClick={() => deleteUser(route('users.destroy', row.original.id), row.original.name)}
+                    <Button
+                        onClick={() => deleteAction(route('categories.destroy', row.original.id), row.original.name)}
                         className="cursor-pointer bg-red-500 text-white duration-200 hover:bg-red-600 hover:opacity-90"
                     >
                         <Trash />
-                    </Button> */}
+                    </Button>
                 </div>
             ),
             enableHiding: false,

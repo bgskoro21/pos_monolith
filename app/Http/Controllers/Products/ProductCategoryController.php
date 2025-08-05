@@ -25,7 +25,7 @@ class ProductCategoryController extends Controller
 
         return Inertia::render('categories/index', [
             "categories" => $categories,
-            "filters" => $pagination,
+            "filters" => $request->all(),
         ]);
     }
 
