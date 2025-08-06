@@ -4,16 +4,14 @@ import ActionsDropdown from '@/components/table/action-dropdown';
 import DropdownHideColumn from '@/components/table/hide-column-dropdown';
 import { getSelectColumn } from '@/components/table/utils';
 import { Button } from '@/components/ui/button';
-import { useAlert } from '@/hooks/use-alert';
 import { useDeleteAction } from '@/hooks/use-delete-action';
-import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { DataTableRowAction } from '@/types/data-table';
 import { FilterData } from '@/types/filter';
 import { Pagination } from '@/types/pagination';
 import { Role } from '@/types/role';
-import { Head, router } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Pencil, Trash } from 'lucide-react';
 import { Dispatch, SetStateAction, useMemo, useState } from 'react';
@@ -112,26 +110,7 @@ const UserPage = ({ users, roles, filters }: UserPageProps) => {
     const [rowAction, setRowAction] = useState<DataTableRowAction<User> | null>(null);
     const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
     const deleteAction = useDeleteAction('User');
-    const alert = useAlert();
-    const toast = useToast();
-
     const columns = useMemo(() => getUserColumns({ setRowAction, deleteUser: deleteAction }), [setRowAction, deleteAction]);
-
-    const handleBulkDelete = async (ids: number[]) => {
-        const confirmed = await alert.confirm('Are you sure?', `You are about to delete ${ids.length} users`);
-
-        if (confirmed) {
-            router.post(
-                route('users.bulk-delete'),
-                { ids },
-                {
-                    onSuccess: () => {
-                        toast.success(`${ids.length} users deleted successfully!`);
-                    },
-                },
-            );
-        }
-    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -150,7 +129,7 @@ const UserPage = ({ users, roles, filters }: UserPageProps) => {
                 >
                     {(table) => (
                         <>
-                            <ActionsDropdown selectedItems={selectedUsers.map((user) => user.id)} onDelete={handleBulkDelete} />
+                            <ActionsDropdown selectedItems={selectedUsers.map((user) => user.id)} actionDelete="users.bulk-delete" instance="User" />
                             <DropdownHideColumn table={table} />
                             <Button onClick={() => setRowAction({ variant: 'create' })} variant="default" className="cursor-pointer text-white">
                                 + Add User

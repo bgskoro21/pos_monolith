@@ -1,5 +1,6 @@
 import BaseTable from '@/components/base-table';
 import CategoryModal from '@/components/modals/category-modal';
+import ActionsDropdown from '@/components/table/action-dropdown';
 import DropdownHideColumn from '@/components/table/hide-column-dropdown';
 import { getSelectColumn } from '@/components/table/utils';
 import { Button } from '@/components/ui/button';
@@ -58,6 +59,11 @@ const ProductCategoryPage = ({ categories, filters }: CategoryPageProps) => {
                 >
                     {(table) => (
                         <>
+                            <ActionsDropdown
+                                selectedItems={selectedCategories.map((user) => user.id)}
+                                actionDelete="categories.bulk-delete"
+                                instance="Categories"
+                            />
                             <DropdownHideColumn table={table} />
                             <Button onClick={() => setRowAction({ variant: 'create' })} variant="default" className="cursor-pointer text-white">
                                 + Add Category

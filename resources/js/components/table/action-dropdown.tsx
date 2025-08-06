@@ -1,16 +1,41 @@
+import { useAlert } from '@/hooks/use-alert';
+import { useToast } from '@/hooks/use-toast';
+import { router } from '@inertiajs/react';
 import { ChevronDown, FileSpreadsheet, FileText, Trash } from 'lucide-react';
 import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 interface ActionsDropdownProps {
     selectedItems: number[];
-    onDelete?: (ids: number[]) => void;
     onExportExcel?: (ids: number[]) => void;
     onExportPdf?: (ids: number[]) => void;
+    actionDelete?: string;
+    instance: string;
     disabled?: boolean;
 }
 
-const ActionsDropdown = ({ selectedItems, onDelete, onExportExcel, onExportPdf, disabled = false }: ActionsDropdownProps) => {
+const ActionsDropdown = ({ selectedItems, onExportExcel, onExportPdf, disabled = false, actionDelete, instance }: ActionsDropdownProps) => {
+    const alert = useAlert();
+    const toast = useToast();
+    const handleBulkDelete = async (ids: number[]) => {
+        const confirmed = await alert.confirm('Are you sure?', `You are about to delete ${ids.length} ${instance.toLowerCase()}`);
+
+        if (confirmed) {
+            console.log(actionDelete);
+            router.post(
+                route(actionDelete!),
+                { ids },
+                {
+                    onSuccess: () => {
+                        toast.success(`${ids.length} ${instance.toLowerCase()} deleted successfully!`);
+                    },
+                    onError: () => {
+                        toast.error(`Error delete ${ids.length} ${instance.toLowerCase()}`);
+                    },
+                },
+            );
+        }
+    };
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -19,8 +44,12 @@ const ActionsDropdown = ({ selectedItems, onDelete, onExportExcel, onExportPdf, 
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                {onDelete && (
-                    <DropdownMenuItem className="cursor-pointer" onSelect={() => onDelete(selectedItems)} disabled={selectedItems.length === 0}>
+                {actionDelete && (
+                    <DropdownMenuItem
+                        className="cursor-pointer"
+                        onSelect={() => handleBulkDelete(selectedItems)}
+                        disabled={selectedItems.length === 0}
+                    >
                         <Trash className="mr-2 h-4 w-4" /> Delete
                     </DropdownMenuItem>
                 )}
