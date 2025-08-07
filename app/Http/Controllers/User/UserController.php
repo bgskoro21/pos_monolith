@@ -62,7 +62,7 @@ class UserController extends Controller
 
     public function bulkDelete(BulkDeleteUserRequest $request)
     {
-        $count = $this->userService->bulkDelete($request->validated());
+        $count = $this->userService->bulkDelete($request->validated()['ids']);
 
         return redirect()->route('users.index')->with('success', "{$count} users deleted successfully");
     }

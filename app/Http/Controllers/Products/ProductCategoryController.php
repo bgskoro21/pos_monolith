@@ -58,7 +58,7 @@ class ProductCategoryController extends Controller
 
     public function bulkDelete(BulkDeleteCategoryRequest $request)
     {
-        $this->productCategoryService->bulkDelete($request->validated());
+        $this->productCategoryService->bulkDelete($request->validated()['ids']);
 
         return redirect()->route("categories.index");
     }
