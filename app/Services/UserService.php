@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\PaginationFilterDTO;
+use App\DTOs\UserDTO;
 use App\Interfaces\Repositories\RoleRepositoryInterface;
 use App\Interfaces\Repositories\UserRepositoryInterface;
 use App\Interfaces\Services\UserServiceInterface;
@@ -47,12 +48,11 @@ class UserService implements UserServiceInterface
         return $this->userRepository->getPaginated($paginationFilter->limit, $paginationFilter->keyword, $paginationFilter->sortField, $paginationFilter->sortDirection);
     }
 
-    public function store(array $data)
+    public function store(UserDTO $data)
     {
-        $roles = $data['roles'] ?? [];
-        unset($data['roles']);
+        $roles = $data->roles;
 
-        $user = $this->userRepository->store($this->prepareUserData($data));
+        $user = $this->userRepository->store($this->prepareUserData($data->toArray()));
 
         if(!empty($roles))
         {
@@ -63,12 +63,11 @@ class UserService implements UserServiceInterface
         return $user;
     }
 
-    public function update(User $user, array $data): User
+    public function update(User $user, UserDTO $data): User
     {
-        $roles = $data['roles'] ?? null;
-        unset($data['roles']);
+        $roles = $data->roles;
 
-        $data = $this->prepareUserData($data);
+        $data = $this->prepareUserData($data->toArray());
 
         $this->userRepository->update($user, $data);
 

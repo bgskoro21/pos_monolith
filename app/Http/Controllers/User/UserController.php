@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\DTOs\PaginationFilterDTO;
+use App\DTOs\UserDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\BulkDeleteUserRequest;
 use App\Http\Requests\User\StoreUserRequest;
@@ -37,14 +38,18 @@ class UserController extends Controller
 
     public function store(StoreUserRequest $request)
     {
-        $this->userService->store($request->validated());
+        $userDto = UserDTO::fromArray($request->validated());
+
+        $this->userService->store($userDto);
 
         return redirect()->route('users.index')->with('success', 'User created successfully.');
     }
 
     public function update(User $user, UpdateUserRequest $request)
     {
-        $this->userService->update($user, $request->validated());
+        $userDto = UserDTO::fromArray($request->validated());
+
+        $this->userService->update($user, $userDto);
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }
