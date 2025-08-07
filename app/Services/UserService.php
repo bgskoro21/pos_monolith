@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\PaginationFilterDTO;
 use App\Interfaces\Repositories\RoleRepositoryInterface;
 use App\Interfaces\Repositories\UserRepositoryInterface;
 use App\Interfaces\Services\UserServiceInterface;
@@ -41,14 +42,9 @@ class UserService implements UserServiceInterface
         return $this->userRepository->register($this->prepareUserData($data));
     }
 
-    public function getPaginatedUsers(array $filters)
+    public function getPaginated(PaginationFilterDTO $paginationFilter)
     {
-        $limit = $filters['limit'] ?? 10;
-        $keyword = $filters['keyword'] ?? null;
-        $sortField = $filters['sort'] ?? 'name';
-        $sortDirection = $filters['direction'] ?? 'asc';
-
-        return $this->userRepository->getPaginatedUsers($limit, $keyword, $sortField, $sortDirection);
+        return $this->userRepository->getPaginated($paginationFilter->limit, $paginationFilter->keyword, $paginationFilter->sortField, $paginationFilter->sortDirection);
     }
 
     public function store(array $data)

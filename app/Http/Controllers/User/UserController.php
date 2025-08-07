@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\User;
 
+use App\DTOs\PaginationFilterDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\BulkDeleteUserRequest;
 use App\Http\Requests\User\StoreUserRequest;
@@ -22,15 +23,15 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $filters = $request->only(['limit', 'keyword', 'sort', 'direction']);
+        $pagination = PaginationFilterDTO::fromArray($request->all());
 
-        $users = $this->userService->getPaginatedUsers($filters);
+        $users = $this->userService->getPaginated($pagination);
         $roles = $this->roleService->getAll();
 
         return Inertia::render("users/user-index", [
             "users" => $users,
             "roles" => $roles,
-            "filters" => $filters,
+            "filters" => $request->all(),
         ]);
     }
 

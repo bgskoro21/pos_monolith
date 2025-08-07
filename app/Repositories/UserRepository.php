@@ -48,7 +48,7 @@ class UserRepository implements UserRepositoryInterface{
         }
     }
 
-    public function getPaginatedUsers(int $limit, ?string $keyword, ?string $sortField = 'name', ?string $sortDirection = 'asc')
+    public function getPaginated(int $limit, ?string $keyword, ?string $sortField = 'name', ?string $sortDirection = 'asc')
     {
         $query = User::query();
 
