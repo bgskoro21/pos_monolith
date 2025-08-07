@@ -1,20 +1,19 @@
 import BaseTable from '@/components/base-table';
+import getUserColumns from '@/components/columns/user-columns';
 import UserModal from '@/components/modals/user-modal';
 import ActionsDropdown from '@/components/table/action-dropdown';
 import DropdownHideColumn from '@/components/table/hide-column-dropdown';
-import { getSelectColumn } from '@/components/table/utils';
 import { Button } from '@/components/ui/button';
 import { useDeleteAction } from '@/hooks/use-delete-action';
 import AppLayout from '@/layouts/app-layout';
+import PageLayout from '@/layouts/page-layout';
 import { BreadcrumbItem } from '@/types';
 import { DataTableRowAction } from '@/types/data-table';
 import { FilterData } from '@/types/filter';
 import { Pagination } from '@/types/pagination';
 import { Role } from '@/types/role';
 import { Head } from '@inertiajs/react';
-import { ColumnDef } from '@tanstack/react-table';
-import { Pencil, Trash } from 'lucide-react';
-import { Dispatch, SetStateAction, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -23,74 +22,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface UserTableColumnsProps {
-    setRowAction: Dispatch<SetStateAction<DataTableRowAction<User> | null>>;
-    deleteUser: (url: string, name: string) => void;
-}
-
-const getUserColumns = ({ setRowAction, deleteUser }: UserTableColumnsProps): ColumnDef<User>[] => {
-    return [
-        getSelectColumn<User>(),
-        {
-            accessorKey: 'name',
-            header: 'Name',
-            cell: ({ row }) => <span>{row.getValue('name')}</span>,
-        },
-        {
-            accessorKey: 'email',
-            header: 'Email',
-            cell: ({ row }) => <span>{row.getValue('email')}</span>,
-        },
-        {
-            accessorKey: 'roles',
-            header: 'Roles',
-            cell: ({ row }) => {
-                const roles = row.original.roles || [];
-                return (
-                    <div className="flex flex-wrap gap-1">
-                        {roles.length > 0 ? (
-                            roles.map((role) => (
-                                <span key={role.id} className="rounded bg-gray-200 px-2 py-1 text-xs font-semibold text-gray-700">
-                                    {role.name}
-                                </span>
-                            ))
-                        ) : (
-                            <span className="text-gray-400 italic">No role</span>
-                        )}
-                    </div>
-                );
-            },
-        },
-        {
-            accessorKey: 'created_at',
-            header: 'Created At',
-            cell: ({ row }) => <span>{new Date(row.getValue('created_at')).toLocaleDateString()}</span>,
-        },
-        {
-            id: 'actions',
-            header: 'Action',
-            cell: ({ row }) => (
-                <div className="space-x-2">
-                    <Button
-                        onClick={() => setRowAction({ row, variant: 'update' })}
-                        className="cursor-pointer bg-primary text-white duration-200 duration-300 hover:opacity-80"
-                    >
-                        <Pencil />
-                    </Button>
-                    <Button
-                        onClick={() => deleteUser(route('users.destroy', row.original.id), row.original.name)}
-                        className="cursor-pointer bg-red-500 text-white duration-200 hover:bg-red-600 hover:opacity-90"
-                    >
-                        <Trash />
-                    </Button>
-                </div>
-            ),
-            enableHiding: false,
-        },
-    ];
-};
-
-interface User {
+export interface User {
     id: number;
     name: string;
     email: string;
@@ -115,10 +47,7 @@ const UserPage = ({ users, roles, filters }: UserPageProps) => {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Users" />
-            <div className="p-4">
-                <div className="mb-3 flex items-center justify-between">
-                    <h1 className="text-4xl font-bold">Users</h1>
-                </div>
+            <PageLayout title="Users">
                 <BaseTable
                     columns={columns}
                     data={users.data}
@@ -137,14 +66,14 @@ const UserPage = ({ users, roles, filters }: UserPageProps) => {
                         </>
                     )}
                 </BaseTable>
-            </div>
-            <UserModal
-                open={rowAction?.variant == 'create' || rowAction?.variant == 'update'}
-                onOpenChange={() => setRowAction(null)}
-                mode={rowAction?.variant == 'create' ? 'create' : 'update'}
-                roles={roles}
-                userData={rowAction?.row?.original ?? null}
-            />
+                <UserModal
+                    open={rowAction?.variant == 'create' || rowAction?.variant == 'update'}
+                    onOpenChange={() => setRowAction(null)}
+                    mode={rowAction?.variant == 'create' ? 'create' : 'update'}
+                    roles={roles}
+                    userData={rowAction?.row?.original ?? null}
+                />
+            </PageLayout>
         </AppLayout>
     );
 };
