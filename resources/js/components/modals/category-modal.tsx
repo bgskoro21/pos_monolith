@@ -58,7 +58,15 @@ const CategoryModal = ({ open, onOpenChange, mode, categoryData }: CategoryModal
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog
+            open={open}
+            onOpenChange={(isOpen) => {
+                if (!isOpen) {
+                    reset();
+                }
+                onOpenChange();
+            }}
+        >
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
@@ -80,7 +88,14 @@ const CategoryModal = ({ open, onOpenChange, mode, categoryData }: CategoryModal
                         {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
                     </div>
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => onOpenChange()}>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                reset();
+                                onOpenChange();
+                            }}
+                        >
                             Cancel
                         </Button>
                         <Button type="submit" disabled={processing}>

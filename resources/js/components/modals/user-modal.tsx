@@ -9,7 +9,7 @@ import { Input } from '../ui/input';
 
 interface UserModalProps {
     open: boolean;
-    onOpenChange: (open: boolean) => void;
+    onOpenChange: () => void;
     mode: 'create' | 'update';
     userData?: { id?: number; name: string; email: string; roles: Role[] } | null;
     roles: Role[];
@@ -70,7 +70,7 @@ const UserModal = ({ open, onOpenChange, mode, userData, roles }: UserModalProps
             onSuccess: () => {
                 toast.success('User updated successfully');
                 reset();
-                onOpenChange(false);
+                onOpenChange();
             },
         });
     };
@@ -81,7 +81,15 @@ const UserModal = ({ open, onOpenChange, mode, userData, roles }: UserModalProps
     }, [data.roles]);
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog
+            open={open}
+            onOpenChange={(isOpen) => {
+                if (!isOpen) {
+                    reset();
+                }
+                onOpenChange();
+            }}
+        >
             <DialogContent
                 onInteractOutside={(e) => {
                     const target = e.target as HTMLElement;
@@ -137,7 +145,14 @@ const UserModal = ({ open, onOpenChange, mode, userData, roles }: UserModalProps
                     </div>
 
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                reset();
+                                onOpenChange();
+                            }}
+                        >
                             Cancel
                         </Button>
                         <Button type="submit" disabled={processing}>
