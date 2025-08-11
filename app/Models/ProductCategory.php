@@ -3,30 +3,17 @@
 namespace App\Models;
 
 use App\Traits\Searchable;
+use App\Traits\Slugable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 class ProductCategory extends Model
 {
-    use Searchable, BelongsToTenant; 
+    use Searchable, Slugable, BelongsToTenant; 
 
     protected $guarded = ['id'];
 
     protected $searchable = [
         'columns' => ['name', 'description'],
     ];
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) 
-        {
-            if(empty($model->slug))
-            {
-                $model->slug = Str::slug($model->name);
-            }
-        });
-    }
 }
